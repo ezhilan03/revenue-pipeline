@@ -1,0 +1,26 @@
+version: 2
+sources:
+  - name: raw
+    schema: revenue_raw
+    tables:
+      - name: events
+models:
+  - name: opportunity_history
+    description: As-known history of source versions; late lower versions do not replace newer facts.
+    columns:
+      - name: opportunity_id
+        data_tests: [not_null]
+      - name: known_from
+        data_tests: [not_null]
+  - name: current_opportunities
+    columns:
+      - name: opportunity_id
+        data_tests: [not_null, unique]
+  - name: current_contracts
+    columns:
+      - name: contract_id
+        data_tests: [not_null, unique]
+  - name: closed_won_without_contract
+    columns:
+      - name: opportunity_id
+        data_tests: [not_null, unique]

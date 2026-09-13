@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:16.9
+    environment:
+      POSTGRES_USER: revenue
+      POSTGRES_DB: revenue
+      POSTGRES_PASSWORD: ${PGPASSWORD:?Set PGPASSWORD for the local database}
+    ports: ["127.0.0.1:55447:5432"]
+    volumes: ["revenue_data:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U revenue -d revenue"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+volumes:
+  revenue_data:
