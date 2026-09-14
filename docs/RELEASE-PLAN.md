@@ -72,7 +72,8 @@ Prometheus/Alertmanager stack delivered both firing and recovery notifications.
 - Monthly spending target and acceptable always-on versus demo availability.
   An always-on Airflow control plane and database need explicit sizing; do not
   reuse the other chat's AWS estimate. Budget alerts are not a hard spending cap.
-- Public GitHub repository name/visibility and preferred external alert destination.
+- Preferred external alert destination. Public `ezhilan03/revenue-pipeline`
+  publication and hosted CI have been approved separately.
 
 These do not prevent local implementation. Do not apply Terraform, create paid
 resources, publish employer artifacts or send notifications without scoped approval.

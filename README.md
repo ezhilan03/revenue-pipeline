@@ -1,5 +1,7 @@
 # Revenue Pipeline Reliability & Forecasting
 
+[![Revenue checks](https://github.com/ezhilan03/revenue-pipeline/actions/workflows/ci.yml/badge.svg)](https://github.com/ezhilan03/revenue-pipeline/actions/workflows/ci.yml)
+
 Current evidence and unfinished release gates: [release status](docs/RELEASE-STATUS.md).
 
 An operational data product for a simple but costly handoff: **CRM says closed-won,

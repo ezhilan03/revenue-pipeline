@@ -1,4 +1,4 @@
-# Release status — 13 September 2026
+# Release status — 14 September 2026
 
 ## Verified local core
 
@@ -16,7 +16,12 @@
 
 ## Not a completed cloud production release
 
-No GitHub repository/push/hosted CI run yet. No Azure billing activation, Terraform
+The public repository is [ezhilan03/revenue-pipeline](https://github.com/ezhilan03/revenue-pipeline).
+Hosted CI [passed on commit 3ecc647](https://github.com/ezhilan03/revenue-pipeline/actions/runs/34809971237):
+Python/PostgreSQL tests, dbt checks, both Docker builds, Airflow DAG loading,
+Prometheus rules, and Terraform validation/mocked tests. No Azure credentials
+or cloud resources were needed by CI.
+No Azure billing activation, Terraform
 apply, cloud runtime, private networking or managed production identity is configured.
 The Terraform module is storage groundwork, not a complete deployment stack.
 Forecasting and AI enrichment remain future milestones; there is no LLM integration
@@ -42,7 +47,6 @@ Restored and load-test databases, dumps and raw evidence remain available.
 
 ## Next authorization boundary
 
-Confirm whether to create public `ezhilan03/revenue-pipeline` before publishing.
-Then push the local checkpoint, execute hosted CI and resolve actual failures.
+Public repository creation, pushing and hosted CI were explicitly approved and started.
 Cloud activation requires a separate region/availability/cost proposal and approval;
 none of those actions are covered by local validation or GitHub publication consent.
