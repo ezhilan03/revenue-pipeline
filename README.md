@@ -3,6 +3,7 @@
 [![Revenue checks](https://github.com/ezhilan03/revenue-pipeline/actions/workflows/ci.yml/badge.svg)](https://github.com/ezhilan03/revenue-pipeline/actions/workflows/ci.yml)
 
 Current evidence and unfinished release gates: [release status](docs/RELEASE-STATUS.md).
+Deployment budget and approval gates: [zero-first cost plan](docs/COST-PLAN.md).
 
 An operational data product for a simple but costly handoff: **CRM says closed-won,
 but there is no signed contract in the contract system.** All examples are synthetic.

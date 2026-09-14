@@ -69,7 +69,8 @@ Prometheus/Alertmanager stack delivered both firing and recovery notifications.
 
 - Approved region and billing reactivation. Personal subscription is identified;
   never use employer billing/access.
-- Monthly spending target and acceptable always-on versus demo availability.
+- Zero incremental hosting spend is the default; see [cost plan](COST-PLAN.md).
+  A paid ceiling and acceptable always-on versus demo availability remain unresolved.
   An always-on Airflow control plane and database need explicit sizing; do not
   reuse the other chat's AWS estimate. Budget alerts are not a hard spending cap.
 - Preferred external alert destination. Public `ezhilan03/revenue-pipeline`
