@@ -54,6 +54,16 @@ def serving_release():
     return release
 
 
+@app.get("/forecast", dependencies=[Depends(authorize)])
+def pipeline_forecast():
+    release = serving_release()
+    result = release["data"].get("forecast")
+    if result is None:
+        raise HTTPException(503, "Publish a release with a forecast before using this route")
+    return {**result, "release_id": release["release_id"],
+            "published_at": release["published_at"]}
+
+
 @app.get("/opportunities/{opportunity_id}/history", dependencies=[Depends(authorize)])
 def history(opportunity_id: str):
     release = serving_release()

@@ -10,7 +10,7 @@
 - Authenticated metrics, Prometheus and Alertmanager firing/recovery audit.
 - Provisioned Grafana dashboard and healthy Prometheus datasource; visible stat
   panels confirmed API up, one incident and no pending task backlog.
-- 87 passing PostgreSQL-backed tests; nine dbt tests; Docker runtime exercises.
+- 106 passing PostgreSQL-backed tests; nine dbt tests; Docker runtime exercises.
 - Separate-database backup/restore fingerprint check and a 1,500-event local load run.
 - Terraform private storage foundation validates and passes mocked security checks.
 
@@ -24,8 +24,9 @@ or cloud resources were needed by CI.
 No Azure billing activation, Terraform
 apply, cloud runtime, private networking or managed production identity is configured.
 The Terraform module is storage groundwork, not a complete deployment stack.
-Forecasting and AI enrichment remain future milestones; there is no LLM integration
-to claim on a resume yet. The current value is operational data engineering.
+An undated, per-currency forecast baseline and optional constrained local Qwen
+triage now exist; see [forecast and AI scope](FORECAST-AND-AI.md). This is not a
+cash forecast or autonomous agent. Activation/invoice/payment sources remain future work.
 
 Forward-only checksummed schema migrations now have a transactional ledger;
 see [migration operations and limitations](MIGRATIONS.md).
@@ -35,8 +36,11 @@ completeness policies, full HTTP/concurrency load testing and external delivery
 adapters. Local static keys and standalone Airflow are development choices.
 
 [Database capability roles](DATABASE-ROLES.md) now have explicit grants and 22
-positive/negative PostgreSQL authorization tests. Dedicated login credentials and
-runtime cutover remain outstanding; running services still use development credentials.
+positive/negative PostgreSQL authorization tests. The dedicated-login local release
+uses separate runtime identities; actual authentication, dbt, publication, API write
+denial and dispatch/resolution have passed. See [local release](LOCAL-RELEASE.md).
+The older monitoring/Airflow development stack has not been cut over; its shared
+credentials and worker isolation remain outstanding.
 
 ## Artifacts and state
 

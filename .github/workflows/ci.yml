@@ -43,6 +43,8 @@ jobs:
       - run: uv run ruff check .
       - run: uv run pytest -q
       - run: uv run dbt test --project-dir dbt --profiles-dir dbt
+      - run: uv run python scripts/verify_identity_flow.py
+      - run: uv run python scripts/evaluate_forecast.py
       - run: docker build -t revenue-pipeline:ci .
       - run: docker build -f Dockerfile.airflow -t revenue-airflow:ci .
       - run: docker run --rm --entrypoint python revenue-airflow:ci /opt/revenue/check_dag.py

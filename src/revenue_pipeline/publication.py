@@ -5,6 +5,7 @@ from uuid import uuid4
 from psycopg import sql
 from psycopg.types.json import Jsonb
 
+from revenue_pipeline.forecast import forecast
 from revenue_pipeline.outbox import sync_cases
 from revenue_pipeline.store import connect
 
@@ -36,6 +37,8 @@ def capture_release(conn):
         if len(rows) > 10000:
             raise ValueError("Local release limit exceeded; previous release retained")
         data[key] = [row["value"] for row in rows]
+    as_of = conn.execute("SELECT clock_timestamp() AS value").fetchone()["value"]
+    data["forecast"] = forecast(data["history"], as_of)
     release_id = uuid4()
     with conn.transaction():
         conn.execute("INSERT INTO revenue_serving.releases(release_id,data) VALUES (%s,%s)",

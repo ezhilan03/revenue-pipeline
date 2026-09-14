@@ -10,12 +10,18 @@ but there is no signed contract in the contract system.** All examples are synth
 
 The first implemented slice ingests source versions, preserves as-known deal
 history, models the mismatch in dbt and serves an authenticated investigation API.
-It is local development, not a completed production release. Forecasting, AI,
-cloud Blob integration and Azure deployment are not implemented yet. Local task
+It is a local release, not a completed cloud production deployment. A point-in-time
+forecast baseline and optional constrained local-model triage are implemented;
+see [scope and evaluation](docs/FORECAST-AND-AI.md). Cloud Blob integration and Azure
+deployment remain unimplemented. Local task
 dispatch, raw replay, validated publication and monitoring are implemented.
 An hourly Airflow DAG, scheduler quality gate and authenticated job metrics now
 exist. Local scheduled and manually triggered Airflow runs have passed against
 PostgreSQL. This verifies a development scheduler, not a production deployment.
+
+For an isolated database and real restricted login identities, use the
+[dedicated-login local release](docs/LOCAL-RELEASE.md). Hosted CI also runs its
+authenticated end-to-end flow and a real HTTP concurrency smoke test.
 
 ## Run locally
 
