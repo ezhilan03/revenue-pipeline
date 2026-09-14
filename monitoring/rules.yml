@@ -1,0 +1,31 @@
+groups:
+  - name: revenue
+    rules:
+      - alert: RevenueTaskBacklog
+        expr: revenue_outbox_pending > 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: Local simulated tasks have not been dispatched
+      - alert: RevenueApiUnavailable
+        expr: up{job="revenue-api"} == 0
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: Revenue metrics endpoint cannot be scraped
+      - alert: RevenueJobUnhealthy
+        expr: revenue_job_success == 0
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: A revenue job is missing, running too long, or failed
+      - alert: RevenueJobStale
+        expr: time() - revenue_job_last_success_timestamp_seconds > 7200
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: A revenue job has not completed in two hours

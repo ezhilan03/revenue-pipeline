@@ -142,6 +142,11 @@ def test_bad_cursor_is_rejected():
 
 def test_api_requires_auth_and_returns_evidence():
     ingest_page("crm", [CRM], 0, 1)
+    from pathlib import Path
+
+    from revenue_pipeline.quality import build
+
+    build(Path("dbt"))
     with TestClient(app) as client:
         assert client.get("/exceptions").status_code == 401
         response = client.get("/exceptions", headers={"X-API-Key": "local-test-key-not-for-deployment"})

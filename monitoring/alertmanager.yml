@@ -1,0 +1,15 @@
+route:
+  receiver: local-audit
+  group_by: ['alertname', 'job', 'exported_job']
+  group_wait: 1s
+  group_interval: 5s
+  repeat_interval: 1h
+receivers:
+  - name: local-audit
+    webhook_configs:
+      - url: http://receiver:8037/alerts
+        send_resolved: true
+        http_config:
+          http_headers:
+            X-API-Key:
+              files: ['/run/secrets/revenue_api_key']

@@ -3,6 +3,17 @@ on: [push, pull_request]
 permissions:
   contents: read
 jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: '1.16.1'
+      - run: terraform -chdir=infra/storage fmt -check -recursive
+      - run: terraform -chdir=infra/storage init -backend=false -input=false
+      - run: terraform -chdir=infra/storage validate
+      - run: terraform -chdir=infra/storage test
   test:
     runs-on: ubuntu-latest
     services:
@@ -33,3 +44,6 @@ jobs:
       - run: uv run pytest -q
       - run: uv run dbt test --project-dir dbt --profiles-dir dbt
       - run: docker build -t revenue-pipeline:ci .
+      - run: docker build -f Dockerfile.airflow -t revenue-airflow:ci .
+      - run: docker run --rm --entrypoint python revenue-airflow:ci /opt/revenue/check_dag.py
+      - run: docker run --rm --entrypoint /bin/promtool -v "$PWD/monitoring:/checks:ro" prom/prometheus:v3.5.0 check rules /checks/rules.yml

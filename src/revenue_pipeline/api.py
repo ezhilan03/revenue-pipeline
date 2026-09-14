@@ -3,7 +3,10 @@ import secrets
 from typing import Annotated
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Query
+from fastapi.responses import Response
 
+from revenue_pipeline.operations import metrics
+from revenue_pipeline.publication import current_release
 from revenue_pipeline.store import connect
 
 app = FastAPI(title="Revenue Handoff Reliability", version="0.1.0")
@@ -22,28 +25,41 @@ def live():
     return {"status": "alive"}
 
 
+@app.get("/metrics", dependencies=[Depends(authorize)])
+def monitoring():
+    return Response(metrics(), media_type="text/plain; version=0.0.4")
+
+
+@app.get("/cases", dependencies=[Depends(authorize)])
+def cases(limit: int = Query(50, ge=1, le=100), offset: int = Query(0, ge=0)):
+    with connect() as conn:
+        items = conn.execute("SELECT * FROM revenue_serving.cases ORDER BY case_id "
+                             "LIMIT %s OFFSET %s", (limit, offset)).fetchall()
+    return {"items": items, "limit": limit, "offset": offset}
+
+
 @app.get("/exceptions", dependencies=[Depends(authorize)])
 def exceptions(limit: int = Query(50, ge=1, le=100), offset: int = Query(0, ge=0)):
-    with connect() as conn:
-        rows = conn.execute(
-            "SELECT * FROM revenue.closed_won_without_contract "
-            "ORDER BY opportunity_id LIMIT %s OFFSET %s", (limit, offset)
-        ).fetchall()
-        freshness = conn.execute(
-            "SELECT source,last_success_at, "
-            "extract(epoch FROM clock_timestamp()-last_success_at)::float AS age_seconds "
-            "FROM revenue_raw.checkpoints ORDER BY source"
-        ).fetchall()
-    return {"items": rows, "source_freshness": freshness, "limit": limit, "offset": offset}
+    release = serving_release()
+    return {"items": release["data"]["items"][offset:offset + limit],
+            "source_freshness": release["data"]["source_freshness"],
+            "release_id": release["release_id"], "published_at": release["published_at"],
+            "limit": limit, "offset": offset}
+
+
+def serving_release():
+    release = current_release()
+    if release is None:
+        raise HTTPException(503, "No validated release has been published")
+    return release
 
 
 @app.get("/opportunities/{opportunity_id}/history", dependencies=[Depends(authorize)])
 def history(opportunity_id: str):
-    with connect() as conn:
-        rows = conn.execute(
-            "SELECT * FROM revenue.opportunity_history WHERE opportunity_id=%s "
-            "ORDER BY known_from", (opportunity_id,)
-        ).fetchall()
+    release = serving_release()
+    rows = [row for row in release["data"]["history"]
+            if row["opportunity_id"] == opportunity_id]
     if not rows:
         raise HTTPException(404, "Opportunity not found")
-    return {"items": rows}
+    return {"items": rows, "release_id": release["release_id"],
+            "published_at": release["published_at"]}

@@ -1,0 +1,55 @@
+services:
+  grafana:
+    image: grafana/grafana:12.4.0
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?Set a local Grafana password}
+      GF_USERS_ALLOW_SIGN_UP: 'false'
+      GF_ANALYTICS_REPORTING_ENABLED: 'false'
+      GF_ANALYTICS_CHECK_FOR_UPDATES: 'false'
+    ports: ['127.0.0.1:3007:3000']
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./monitoring/grafana/revenue.json:/var/lib/grafana/provisioned-dashboards/revenue.json:ro
+  api:
+    image: revenue-monitoring:local
+    build: .
+    environment:
+      DATABASE_URL: ${DATABASE_URL:?Set the initialized local database URL}
+      REVENUE_API_KEY: ${REVENUE_API_KEY:?Set a local API key}
+    ports: ['127.0.0.1:8018:8000']
+  receiver:
+    image: revenue-monitoring:local
+    build: .
+    command: ['/app/.venv/bin/uvicorn', 'revenue_pipeline.alert_receiver:app', '--host', '0.0.0.0', '--port', '8037']
+    environment:
+      REVENUE_API_KEY: ${REVENUE_API_KEY:?Set a local API key}
+      ALERT_DATABASE_PATH: /home/revenue/alerts/notifications.sqlite
+    volumes: ['alert_audit:/home/revenue/alerts']
+    ports: ['127.0.0.1:8037:8037']
+  prometheus:
+    image: prom/prometheus:v3.5.0
+    command: ['--config.file=/etc/prometheus/prometheus.yml', '--storage.tsdb.retention.time=24h', '--storage.tsdb.retention.size=100MB']
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./monitoring/rules.yml:/etc/prometheus/rules.yml:ro
+      - prometheus_data:/prometheus
+    secrets: [revenue_api_key]
+    ports: ['127.0.0.1:9097:9090']
+  alertmanager:
+    image: prom/alertmanager:v0.28.1
+    command: ['--config.file=/etc/alertmanager/alertmanager.yml', '--cluster.listen-address=']
+    volumes:
+      - ./monitoring/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+      - alertmanager_data:/alertmanager
+    secrets: [revenue_api_key]
+    ports: ['127.0.0.1:9098:9093']
+secrets:
+  revenue_api_key:
+    environment: REVENUE_API_KEY
+volumes:
+  grafana_data:
+  alert_audit:
+  prometheus_data:
+  alertmanager_data:

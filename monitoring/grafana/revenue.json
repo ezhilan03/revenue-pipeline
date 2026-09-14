@@ -1,0 +1,22 @@
+{
+  "uid": "revenue-operations", "title": "Revenue Pipeline Operations",
+  "schemaVersion": 39, "version": 1, "refresh": "10s",
+  "time": {"from": "now-1h", "to": "now"}, "tags": ["synthetic", "local"],
+  "panels": [
+    {"id": 1, "title": "API scrape health", "type": "stat", "gridPos": {"x":0,"y":0,"w":8,"h":6},
+     "datasource": {"type":"prometheus","uid":"revenue-prometheus"},
+     "targets": [{"refId":"A","expr":"up{job=\"revenue-api\"}"}]},
+    {"id": 2, "title": "Open handoff incidents", "type": "stat", "gridPos": {"x":8,"y":0,"w":8,"h":6},
+     "datasource": {"type":"prometheus","uid":"revenue-prometheus"},
+     "targets": [{"refId":"A","expr":"revenue_cases_open"}]},
+    {"id": 3, "title": "Pending simulated tasks", "type": "stat", "gridPos": {"x":16,"y":0,"w":8,"h":6},
+     "datasource": {"type":"prometheus","uid":"revenue-prometheus"},
+     "targets": [{"refId":"A","expr":"revenue_outbox_pending"}]},
+    {"id": 4, "title": "Seconds since full successful job", "type": "timeseries", "gridPos": {"x":0,"y":6,"w":12,"h":9},
+     "datasource": {"type":"prometheus","uid":"revenue-prometheus"},
+     "targets": [{"refId":"A","expr":"time() - revenue_job_last_success_timestamp_seconds","legendFormat":"{{exported_job}}"}]},
+    {"id": 5, "title": "Latest attempt succeeded", "type": "timeseries", "gridPos": {"x":12,"y":6,"w":12,"h":9},
+     "datasource": {"type":"prometheus","uid":"revenue-prometheus"},
+     "targets": [{"refId":"A","expr":"revenue_job_success","legendFormat":"{{exported_job}}"}]}
+  ]
+}

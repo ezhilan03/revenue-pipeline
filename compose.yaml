@@ -1,4 +1,35 @@
 services:
+  airflow:
+    build:
+      context: .
+      dockerfile: Dockerfile.airflow
+    profiles: ["orchestration"]
+    command: standalone
+    environment:
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "true"
+      DATABASE_URL: postgresql://revenue:${PGPASSWORD:?Set PGPASSWORD}@postgres:5432/revenue
+      REVENUE_SOURCE_URL: http://simulator:8027
+      REVENUE_ARCHIVE_DIR: /opt/airflow/raw_archive
+    ports: ["127.0.0.1:8087:8080"]
+    volumes:
+      - airflow_state:/opt/airflow
+    depends_on:
+      postgres:
+        condition: service_healthy
+      simulator:
+        condition: service_started
+  simulator:
+    build: .
+    profiles: ["sources"]
+    command: ["/app/.venv/bin/uvicorn", "revenue_pipeline.simulator:from_environment", "--factory", "--host", "0.0.0.0", "--port", "8027"]
+    environment:
+      SIMULATOR_DELIVER_CONTRACT: ${SIMULATOR_DELIVER_CONTRACT:-0}
+    ports: ["127.0.0.1:8027:8027"]
+    read_only: true
+    tmpfs: ["/tmp"]
+    cap_drop: ["ALL"]
+    security_opt: ["no-new-privileges:true"]
   postgres:
     image: postgres:16.9
     environment:
@@ -13,4 +44,5 @@ services:
       timeout: 3s
       retries: 20
 volumes:
+  airflow_state:
   revenue_data:

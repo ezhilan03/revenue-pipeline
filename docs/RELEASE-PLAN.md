@@ -44,10 +44,31 @@ late delivery would lose detail. This is a bounded source-version/observation
 history, not a fully general bitemporal accounting system or a forecast product.
 Record publication time separately when materialized forecast releases arrive.
 
+## Current access and billing boundary
+
+Azure CLI authentication verified for the personal Default Directory and Azure
+subscription 1. The expired subscription remains disabled. The three approved old
+learning resources were removed; the vault was soft-deleted, not purged. The user
+approved continuing locally without upgrading billing. Do not reactivate, provision,
+or apply Terraform until a cost estimate and separate approval are recorded.
+
+Local HTTP simulator and bounded polling runner now exist, with retry/replay tests
+and durable full-job outcomes. Hourly Airflow configuration and scheduler quality
+gate have passed scheduled and manual local runs after storage recovery.
+Atomic frozen-release publication is implemented and locally tested, with a
+10,000-row-per-collection demo limit and source-lock coordination. Milestone 2
+has passed Grafana runtime verification; production monitoring hardening is outstanding.
+Transactional case lifecycle and database-local task outbox passed unit/integration
+tests and a real three-task Airflow run. No external task destination is configured.
+Local checksum-addressed pages, completed-poll manifests and replay are implemented;
+archive support now runs inside Airflow; cloud archive storage remains pending.
+Publication now passes through Airflow; the local
+Prometheus/Alertmanager stack delivered both firing and recovery notifications.
+
 ## Release design decisions awaiting user input
 
-- Azure subscription/tenant, approved region, and whether a personal subscription
-  already exists. Never use employer billing/access.
+- Approved region and billing reactivation. Personal subscription is identified;
+  never use employer billing/access.
 - Monthly spending target and acceptable always-on versus demo availability.
   An always-on Airflow control plane and database need explicit sizing; do not
   reuse the other chat's AWS estimate. Budget alerts are not a hard spending cap.

@@ -10,3 +10,5 @@ dbt/.user.yml
 reports/
 *.tfstate*
 .terraform/
+*.tfvars
+*.tfvars.json

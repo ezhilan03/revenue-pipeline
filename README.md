@@ -1,12 +1,18 @@
 # Revenue Pipeline Reliability & Forecasting
 
+Current evidence and unfinished release gates: [release status](docs/RELEASE-STATUS.md).
+
 An operational data product for a simple but costly handoff: **CRM says closed-won,
 but there is no signed contract in the contract system.** All examples are synthetic.
 
 The first implemented slice ingests source versions, preserves as-known deal
 history, models the mismatch in dbt and serves an authenticated investigation API.
 It is local development, not a completed production release. Forecasting, AI,
-automated tasks, Airflow, Blob storage and Azure deployment are not implemented yet.
+cloud Blob integration and Azure deployment are not implemented yet. Local task
+dispatch, raw replay, validated publication and monitoring are implemented.
+An hourly Airflow DAG, scheduler quality gate and authenticated job metrics now
+exist. Local scheduled and manually triggered Airflow runs have passed against
+PostgreSQL. This verifies a development scheduler, not a production deployment.
 
 ## Run locally
 
@@ -20,7 +26,7 @@ export REVENUE_API_KEY='choose-a-local-api-key'
 docker compose -p revenue-dev up -d --wait
 uv sync --frozen
 uv run python -m revenue_pipeline.demo
-uv run dbt build --project-dir dbt --profiles-dir dbt
+uv run python -m revenue_pipeline.quality
 uv run uvicorn revenue_pipeline.api:app --host 127.0.0.1 --port 8017
 ```
 
@@ -35,12 +41,45 @@ units). Deliver the missing signed contract:
 
 ```sh
 uv run python -m revenue_pipeline.demo --deliver-contract
+uv run python -m revenue_pipeline.quality
 ```
 
-The dbt models are views in this slice: the next API read has no open exception.
+The quality command validates and publishes a frozen release: the next API read
+has no open exception. Ingestion or direct `dbt build` alone does not publish.
 Replaying the seed does not duplicate source versions. It does not erase a
 previously delivered contract; use a separate clean development database to
 restart the scenario.
+
+## Poll a real local HTTP source
+
+Point `DATABASE_URL` at a separate empty development database, not the seeded
+demo above. Initialize its tables, then start the synthetic source:
+
+```sh
+uv run python -c 'from revenue_pipeline.store import initialize; initialize()'
+uv run uvicorn revenue_pipeline.simulator:from_environment --factory --host 127.0.0.1 --port 8027
+```
+
+Run the bounded ingestion job with the same `DATABASE_URL`:
+
+```sh
+uv run python -m revenue_pipeline.runner
+```
+
+The job polls both feeds, resumes committed offsets, emits JSON run/source outcomes
+and exits nonzero on failure. Repeat runs do not duplicate versions. This is a job
+entrypoint, not an installed scheduler or a model publication gate.
+
+To deliver the contract, stop only the simulator process and restart it with
+`SIMULATOR_DELIVER_CONTRACT=1` preceding the same uvicorn command, then rerun the
+job. The fixed fixture adds the contract without changing the CRM prefix. Reverting
+the fixture after consumption returns HTTP 409 rather than silently resetting a
+checkpoint. Do not mix the direct-seed demo and HTTP feed in the same database:
+they have different offset logs. Use a separate initialized database for each.
+
+Alternatively, `docker compose -p revenue-dev --profile sources up -d --build simulator`
+runs the source in a non-root, read-only container on loopback port 8027. The source
+has synthetic data only and no public authentication; do not deploy it publicly.
 
 ## Data correctness
 
@@ -75,7 +114,7 @@ limits, pooling or token identity claims are made.
 ## Verify
 
 Tests require a **dedicated disposable PostgreSQL database whose name ends `_test`**.
-Tests truncate only this project's raw tables in that database. Never point them
+Tests truncate this project's raw and serving tables in that database. Never point them
 at a development environment whose records you want to retain.
 
 ```sh
@@ -87,12 +126,26 @@ uv run ruff check .
 The test fixture builds dbt views against real PostgreSQL before API/integration
 tests. GitHub Actions config adds data tests and a Docker image build; a workflow
 file is not evidence of a successful hosted run. The API image deliberately omits
-dbt/test dependencies; a separate orchestration image is still required.
+dbt/test dependencies; `Dockerfile.airflow` supplies the separate orchestration image.
 
 ## Planned deployment
 
+The polling CLI now retains checksum-addressed source pages and completed-poll
+manifests. See [replay and recovery](docs/REPLAY.md) for resume rules and limits.
+
+Local Prometheus scraping, Alertmanager routing and an authenticated notification
+audit sink are available in [the monitoring runbook](docs/MONITORING.md).
+Notifications stay local. Grafana's provisioned dashboard is verified locally;
+external paging is not configured. See [task queue](docs/TASK-QUEUE.md) and
+[recovery checks](docs/RECOVERY.md) for additional operational evidence.
+
+See [local operations](docs/LOCAL-OPERATIONS.md) for the new orchestration setup,
+recovery semantics, metrics and the distinction between a scheduler quality gate
+and atomic publication. See the verification record for executed checks and gaps.
+
 Azure Blob raw landing → Python ingestion → PostgreSQL/dbt → Container Apps API.
 Airflow will coordinate intervals, retries, backfills and model publication.
-Terraform, scoped identity, CI/CD, operational alerts and measured recovery are
-required before the first cloud release. Account, region and spending approval
-remain outstanding. See [release plan](docs/RELEASE-PLAN.md).
+The [Terraform storage foundation](infra/storage/README.md) passes local validation
+and mocked security checks, but has not been applied. Full cloud networking,
+compute, identity, deployment pipeline and spending approval remain outstanding.
+See [release plan](docs/RELEASE-PLAN.md).

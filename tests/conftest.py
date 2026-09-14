@@ -31,4 +31,7 @@ def warehouse():
 @pytest.fixture(autouse=True)
 def clean_source_tables(warehouse):
     with connect() as conn:
-        conn.execute("TRUNCATE revenue_raw.events, revenue_raw.checkpoints")
+        conn.execute("TRUNCATE revenue_raw.events, revenue_raw.checkpoints, revenue_raw.job_runs")
+        conn.execute("TRUNCATE revenue_serving.current_release, revenue_serving.releases")
+        conn.execute("TRUNCATE revenue_serving.outbox, revenue_serving.cases, "
+                     "revenue_serving.simulated_tasks")
