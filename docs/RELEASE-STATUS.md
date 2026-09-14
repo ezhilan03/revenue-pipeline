@@ -10,7 +10,7 @@
 - Authenticated metrics, Prometheus and Alertmanager firing/recovery audit.
 - Provisioned Grafana dashboard and healthy Prometheus datasource; visible stat
   panels confirmed API up, one incident and no pending task backlog.
-- 65 passing PostgreSQL-backed tests; nine dbt tests; Docker runtime exercises.
+- 87 passing PostgreSQL-backed tests; nine dbt tests; Docker runtime exercises.
 - Separate-database backup/restore fingerprint check and a 1,500-event local load run.
 - Terraform private storage foundation validates and passes mocked security checks.
 
@@ -33,6 +33,10 @@ Production hardening gaps include full schema-drift validation, least-privilege
 database roles, request/body limits, retention, cloud-independent backup, source
 completeness policies, full HTTP/concurrency load testing and external delivery
 adapters. Local static keys and standalone Airflow are development choices.
+
+[Database capability roles](DATABASE-ROLES.md) now have explicit grants and 22
+positive/negative PostgreSQL authorization tests. Dedicated login credentials and
+runtime cutover remain outstanding; running services still use development credentials.
 
 ## Artifacts and state
 
