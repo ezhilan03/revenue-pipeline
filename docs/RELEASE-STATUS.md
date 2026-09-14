@@ -10,7 +10,7 @@
 - Authenticated metrics, Prometheus and Alertmanager firing/recovery audit.
 - Provisioned Grafana dashboard and healthy Prometheus datasource; visible stat
   panels confirmed API up, one incident and no pending task backlog.
-- 58 passing PostgreSQL-backed tests; nine dbt tests; Docker runtime exercises.
+- 65 passing PostgreSQL-backed tests; nine dbt tests; Docker runtime exercises.
 - Separate-database backup/restore fingerprint check and a 1,500-event local load run.
 - Terraform private storage foundation validates and passes mocked security checks.
 
@@ -27,7 +27,9 @@ The Terraform module is storage groundwork, not a complete deployment stack.
 Forecasting and AI enrichment remain future milestones; there is no LLM integration
 to claim on a resume yet. The current value is operational data engineering.
 
-Production hardening gaps include versioned schema migrations, least-privilege
+Forward-only checksummed schema migrations now have a transactional ledger;
+see [migration operations and limitations](MIGRATIONS.md).
+Production hardening gaps include full schema-drift validation, least-privilege
 database roles, request/body limits, retention, cloud-independent backup, source
 completeness policies, full HTTP/concurrency load testing and external delivery
 adapters. Local static keys and standalone Airflow are development choices.

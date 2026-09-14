@@ -14,6 +14,7 @@ from psycopg import sql
 from psycopg.conninfo import make_conninfo
 
 TABLES = {
+    "revenue_meta": ("schema_migrations",),
     "revenue_raw": ("events", "checkpoints", "job_runs"),
     "revenue_serving": ("releases", "current_release", "cases", "outbox", "simulated_tasks"),
 }
